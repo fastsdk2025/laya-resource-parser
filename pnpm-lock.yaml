@@ -11,6 +11,9 @@ importers:
       chalk:
         specifier: ^5.6.2
         version: 5.6.2
+      zod:
+        specifier: ^4.3.2
+        version: 4.3.2
     devDependencies:
       '@types/chalk':
         specifier: ^2.2.4
@@ -523,6 +526,9 @@ packages:
   undici-types@7.16.0:
     resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
 
+  zod@4.3.2:
+    resolution: {integrity: sha512-b8L8yn4rIVfiXyHAmnr52/ZEpDumlT0bmxiq3Ws1ybrinhflGpt12Hvv54kYnEsGPRs6o/Ka3/ppA2OWY21IVg==}
+
 snapshots:
 
   '@esbuild/aix-ppc64@0.27.2':
@@ -904,3 +910,5 @@ snapshots:
   ufo@1.6.1: {}
 
   undici-types@7.16.0: {}
+
+  zod@4.3.2: {}
