@@ -1,5 +1,7 @@
 import type { Command } from "commander";
 import { join } from "node:path";
+import { runParse } from "./actions";
+import { ParseOptionsSchema, type ParseCommandOptions } from "./schema";
 
 export function registerParseCommand(program: Command) {
   program
@@ -54,7 +56,17 @@ export function registerParseCommand(program: Command) {
       "压缩分包配置文件路径(默认为基础目录下的bundle.json)",
       join(process.cwd(), "src", "bundle.json")
     )
-    .action(async () => {
-      // TODO: 实现解析资源依赖关系的逻辑
+    .action(async (rawOptions) => {
+      const result = ParseOptionsSchema.safeParse(rawOptions);
+
+      if (!result.success) {
+        console.error("参数解析失败: ");
+        console.error(result.error);
+        process.exit(1);
+      }
+
+      const options: ParseCommandOptions = result.data;
+
+      await runParse(options);
     });
 }
