@@ -1,5 +1,6 @@
 import { Command } from "commander";
 import { version } from "../package.json";
+import { registerParseCommand } from "./commands/parse";
 
 async function main(): Promise<void> {
   const program = new Command();
@@ -8,6 +9,8 @@ async function main(): Promise<void> {
     .name("lr")
     .version(version)
     .description("Laya资源解析器 - 解析Laya项目中的资源依赖关系")
+
+  registerParseCommand(program)
 
   await program.parseAsync(process.argv);
 }
