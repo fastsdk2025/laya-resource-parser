@@ -3,7 +3,12 @@
   "version": "1.0.0",
   "description": "Laya 资源解析器",
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "build": "tsup",
+    "build:prod": "NODE_ENV=production tsup --minify",
+    "dev": "tsup --watch",
+    "type-check": "tsc --noEmit"
+  },
   "keywords": [],
   "author": "tuiu <13719283454@163.com>",
   "license": "MIT",
