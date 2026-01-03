@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Laya 资源解析器",
   "type": "module",
+  "bin": {
+    "lr": "./dist/index.cjs"
+  },
   "scripts": {
     "build": "tsup",
     "build:prod": "NODE_ENV=production tsup --minify",
