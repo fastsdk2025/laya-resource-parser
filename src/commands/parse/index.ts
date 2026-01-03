@@ -61,7 +61,9 @@ export function registerParseCommand(program: Command) {
 
       if (!result.success) {
         console.error("参数解析失败: ");
-        console.error(result.error);
+        for (const item of JSON.parse(result.error.message)) {
+          console.error(item.message)
+        }
         process.exit(1);
       }
 
