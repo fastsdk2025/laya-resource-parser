@@ -13,7 +13,7 @@ export function registerParseCommand(program: Command) {
       join(process.cwd(), "src")
     )
     .option(
-      "-r, --remote",
+      "-r, --remote <url>",
       "远程资源URL(必须为有效的HTTP/HTTPS URL)",
       (value: string) => {
         if (!value.trim()) {
