@@ -1,3 +1,4 @@
+import { resolve } from "node:path";
 import z from "zod";
 
 const httpUrlSchema = z.string().trim().refine((value: string) => {
@@ -13,7 +14,7 @@ const convertToNumberSchema = z
   .union([z.string(), z.number()])
   .transform((value: string | number): number => Number(value))
 
-const resolveSchema = z.string().transform((value: string) => Number(value))
+const resolveSchema = z.string().transform((value: string) => resolve(value))
 
 export const ParseOptionsSchema = z.object({
   base: resolveSchema,
