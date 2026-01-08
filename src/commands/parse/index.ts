@@ -2,6 +2,8 @@ import type { Command } from "commander";
 import { join } from "node:path";
 import { runParse } from "./actions";
 import { ParseOptionsSchema, type ParseCommandOptions } from "./schema";
+import { Chalk } from "chalk";
+const chalk = new Chalk();
 
 export function registerParseCommand(program: Command) {
   program
@@ -60,10 +62,30 @@ export function registerParseCommand(program: Command) {
       const result = ParseOptionsSchema.safeParse(rawOptions);
 
       if (!result.success) {
-        console.error("参数解析失败: ");
-        for (const item of JSON.parse(result.error.message)) {
-          console.error(item.message)
+        console.error(chalk.green("参数解析失败: "));
+        const errors = JSON.parse(result.error.message);
+
+        for (const error of errors) {
+          const path = error.path.join(".");
+          let message = error.message;
+
+          switch (error.code) {
+            case 'required':
+              message = `缺少必填参数: ${path}`;
+              break;
+            case 'invalid_type':
+              message = `参数类型错误: ${path} 应为 ${error.expected}, 实际为 ${error.received}`;
+              break;
+            case 'invalid_enum_value':
+              message = `参数值无效: ${path} 应为 ${error.expected.join(', ')}, 实际为 ${error.received}`;
+              break;
+            default:
+              message = `未知错误: ${path} - ${error.message}`;
+          }
+          console.error(chalk.red(`  • ${message}`));
         }
+
+        console.log(chalk.blue("\n使用 --help 查看完整参数说明"));
         process.exit(1);
       }
 
