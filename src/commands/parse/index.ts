@@ -1,8 +1,9 @@
+import { Chalk } from "chalk";
 import type { Command } from "commander";
 import { join } from "node:path";
+import type { ZodSafeParseResult } from "zod";
 import { runParse } from "./actions";
 import { ParseOptionsSchema, type ParseCommandOptions } from "./schema";
-import { Chalk } from "chalk";
 const chalk = new Chalk();
 
 export function registerParseCommand(program: Command) {
@@ -59,7 +60,7 @@ export function registerParseCommand(program: Command) {
       join(process.cwd(), "src", "bundle.json")
     )
     .action(async (rawOptions) => {
-      const result = ParseOptionsSchema.safeParse(rawOptions);
+      const result: ZodSafeParseResult<ParseCommandOptions> = ParseOptionsSchema.safeParse(rawOptions);
 
       if (!result.success) {
         console.error(chalk.green("参数解析失败: "));
