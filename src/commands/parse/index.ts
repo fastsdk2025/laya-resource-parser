@@ -4,6 +4,7 @@ import { join } from "node:path";
 import type { ZodSafeParseResult } from "zod";
 import { runParse } from "./actions";
 import { ParseOptionsSchema, type ParseCommandOptions } from "./schema";
+import { formatZodErrors, validateHttpUrl } from "./utils";
 const chalk = new Chalk();
 
 export function registerParseCommand(program: Command) {
@@ -18,24 +19,7 @@ export function registerParseCommand(program: Command) {
     .option(
       "-r, --remote <url>",
       "远程资源URL(必须为有效的HTTP/HTTPS URL)",
-      (value: string) => {
-        if (!value.trim()) {
-          throw new Error("远程URL不能为空")
-        }
-
-        try {
-          const url = new URL(value);
-          if (url.protocol !== "http:" && url.protocol !== "https:") {
-            throw new Error("远程URL必须是有效的HTTP或HTTPS URL")
-          }
-
-          return value;
-        } catch (error) {
-          throw new Error("远程URL必须是有效的HTTP或HTTPS URL", {
-            cause: error
-          })
-        }
-      }
+      validateHttpUrl,
     )
     .option("-c, --concurrency <number>", "并发处理数", "5")
     .option("-d, --debug", "启动调式模式", false)
@@ -63,35 +47,33 @@ export function registerParseCommand(program: Command) {
       const result: ZodSafeParseResult<ParseCommandOptions> = ParseOptionsSchema.safeParse(rawOptions);
 
       if (!result.success) {
-        console.error(chalk.green("参数解析失败: "));
-        const errors = JSON.parse(result.error.message);
+        console.log(chalk.red("❌ 参数解析失败: "));
+        const errors = formatZodErrors(result);
 
         for (const error of errors) {
-          const path = error.path.join(".");
-          let message = error.message;
-
-          switch (error.code) {
-            case 'required':
-              message = `缺少必填参数: ${path}`;
-              break;
-            case 'invalid_type':
-              message = `参数类型错误: ${path} 应为 ${error.expected}, 实际为 ${error.received}`;
-              break;
-            case 'invalid_enum_value':
-              message = `参数值无效: ${path} 应为 ${error.expected.join(', ')}, 实际为 ${error.received}`;
-              break;
-            default:
-              message = `未知错误: ${path} - ${error.message}`;
-          }
-          console.error(chalk.red(`  • ${message}`));
+          console.log(chalk.yellow(`  • ${error}`))
         }
 
-        console.log(chalk.blue("\n使用 --help 查看完整参数说明"));
+        console.log(chalk.blue("\n💡 使用 --help 查看完整参数说明"));
         process.exit(1);
       }
 
       const options: ParseCommandOptions = result.data;
 
-      await runParse(options);
+      try {
+        await runParse(options);
+      } catch (error) {
+        console.error(chalk.red("❌ 执行失败:"))
+        if (error instanceof Error) {
+          console.error(chalk.red(`  ${error.message}`));
+          if (options.debug && error.cause) {
+            console.error(chalk.gray(`  ${error.cause}`));
+          }
+        } else {
+          console.error(chalk.red(`  未知错误: ${error}`))
+        }
+
+        process.exit(1);
+      }
     });
 }
