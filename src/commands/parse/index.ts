@@ -1,6 +1,11 @@
+import { Chalk } from "chalk";
 import type { Command } from "commander";
+import { ZodSafeParseResult } from "zod";
 import { PROJECT_ROOT } from "../../constants";
-import { ParseOptions } from "./types";
+import { ParseCommandOptions, ParseOptionsSchema } from "./schema";
+import { formatZodErrors } from "./utils";
+
+const chalk = new Chalk();
 
 export function registerParseCommand(program: Command) {
   program
@@ -12,7 +17,7 @@ export function registerParseCommand(program: Command) {
     )
     .requiredOption(
       "-r, --remote <url>",
-      "Remote URL for parsing",
+      "Remote resource URL",
       (value: string): string => {
         try {
           const url = new URL(value);
@@ -40,7 +45,34 @@ export function registerParseCommand(program: Command) {
       "Retry frequency",
       "3"
     )
-    .action((options: ParseOptions) => {
-      console.log("Parse Command", options)
+    .action(async (rawOptions) => {
+      const result: ZodSafeParseResult<ParseCommandOptions> = ParseOptionsSchema.safeParse(rawOptions);
+
+      if (!result.success) {
+        console.log(chalk.red("Parameter parsing failed: "));
+        const errors = formatZodErrors(result);
+
+        for (const error of errors) {
+          console.log(chalk.yellow(`  • ${error}`))
+        }
+
+        console.log(chalk.blue("\nUse --help to view the full parameter description."))
+        process.exit(1)
+      }
+
+      const options: ParseCommandOptions = result.data;
+
+      try {
+        console.log(chalk.green(`options: ${JSON.stringify(options, null, 2)}`))
+      } catch (error) {
+        console.log(chalk.red("Execution failed:"))
+        if (error instanceof Error) {
+          console.log(chalk.red(`  ${error.message}`));
+        } else {
+          console.log(chalk.red(`  Unknown error: ${error}`))
+        }
+
+        process.exit(1)
+      }
     })
 }
