@@ -4,6 +4,7 @@ import { ZodSafeParseResult } from "zod";
 import { PROJECT_ROOT } from "../../constants";
 import { ParseCommandOptions, ParseOptionsSchema } from "./schema";
 import { formatZodErrors } from "./utils";
+import { runParse } from "./actions";
 
 const chalk = new Chalk();
 
@@ -63,7 +64,7 @@ export function registerParseCommand(program: Command) {
       const options: ParseCommandOptions = result.data;
 
       try {
-        console.log(chalk.green(`options: ${JSON.stringify(options, null, 2)}`))
+        await runParse(options);
       } catch (error) {
         console.log(chalk.red("Execution failed:"))
         if (error instanceof Error) {
